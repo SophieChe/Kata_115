@@ -16,7 +16,6 @@ public class Util {
     public Connection getConnection() {
         try {
             connection = DriverManager.getConnection(BD_URL, BD_USERNAME, BD_PASSWORD);
-            //System.out.println("connection ok");
         } catch (SQLException e) {
             System.out.println("connection error");
         }
