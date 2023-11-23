@@ -1,9 +1,11 @@
 package jm.task.core.jdbc.dao;
+
 import jm.task.core.jdbc.model.User;
 import jm.task.core.jdbc.util.Util;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
+import org.hibernate.query.Query;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,14 +14,16 @@ public class UserDaoHibernateImpl implements UserDao {
     public UserDaoHibernateImpl() {
 
     }
+
     public Transaction transaction;
+
     @Override
     public void createUsersTable() {
         try (Session session = Util.getSessionFactory().openSession()) {
             transaction = session.beginTransaction();
-            String str = "CREATE TABLE IF NOT EXISTS USERS" +
-                    "(ID BIGINT PRIMARY KEY AUTO_INCREMENT, NAME VARCHAR(255), LASTNAME VARCHAR(255), AGE TINYINT)";
-            session.createNativeQuery(str, User.class).executeUpdate();
+            Query<User> query = session.createNativeQuery("CREATE TABLE IF NOT EXISTS USERS" +
+                    "(ID BIGINT PRIMARY KEY AUTO_INCREMENT, NAME VARCHAR(255), LASTNAME VARCHAR(255), AGE TINYINT)", User.class);
+            query.executeUpdate();
             transaction.commit();
         } catch (Exception e) {
             transaction.rollback();
@@ -31,7 +35,8 @@ public class UserDaoHibernateImpl implements UserDao {
     public void dropUsersTable() { // если удаляем таблу,которой нет,не дб исключений
         try (Session session = Util.getSessionFactory().openSession()) {
             transaction = session.beginTransaction();
-            session.createNativeQuery("DROP TABLE IF EXISTS USERS", User.class).executeUpdate();
+            Query<User> query = session.createNativeQuery("DROP TABLE IF EXISTS USERS", User.class);
+            query.executeUpdate();
             transaction.commit();
         } catch (HibernateException e) {
             transaction.rollback();
@@ -87,7 +92,8 @@ public class UserDaoHibernateImpl implements UserDao {
     public void cleanUsersTable() { // очищаем таблу, но саму не удаляем
         try (Session session = Util.getSessionFactory().openSession()) {
             transaction = session.beginTransaction();
-            session.createQuery("DELETE FROM User").executeUpdate();
+            Query query = session.createQuery("DELETE FROM User");
+            int queryCheck = query.executeUpdate();
             transaction.commit();
         } catch (HibernateException e) {
             transaction.rollback();
