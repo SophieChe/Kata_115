@@ -1,5 +1,4 @@
 package jm.task.core.jdbc.dao;
-
 import jm.task.core.jdbc.model.User;
 import jm.task.core.jdbc.util.Util;
 import org.hibernate.HibernateException;
@@ -21,9 +20,9 @@ public class UserDaoHibernateImpl implements UserDao {
     public void createUsersTable() {
         try (Session session = Util.getSessionFactory().openSession()) {
             transaction = session.beginTransaction();
-            Query<User> query = session.createNativeQuery("CREATE TABLE IF NOT EXISTS USERS" +
-                    "(ID BIGINT PRIMARY KEY AUTO_INCREMENT, NAME VARCHAR(255), LASTNAME VARCHAR(255), AGE TINYINT)", User.class);
-            query.executeUpdate();
+            session.createNativeQuery("CREATE TABLE IF NOT EXISTS USERS" +
+                    "(ID BIGINT PRIMARY KEY AUTO_INCREMENT, NAME VARCHAR(255), LASTNAME VARCHAR(255), AGE TINYINT)", User.class)
+                    .executeUpdate();
             transaction.commit();
         } catch (Exception e) {
             transaction.rollback();
@@ -35,8 +34,7 @@ public class UserDaoHibernateImpl implements UserDao {
     public void dropUsersTable() { // если удаляем таблу,которой нет,не дб исключений
         try (Session session = Util.getSessionFactory().openSession()) {
             transaction = session.beginTransaction();
-            Query<User> query = session.createNativeQuery("DROP TABLE IF EXISTS USERS", User.class);
-            query.executeUpdate();
+            session.createNativeQuery("DROP TABLE IF EXISTS USERS", User.class).executeUpdate();
             transaction.commit();
         } catch (HibernateException e) {
             transaction.rollback();
@@ -81,7 +79,8 @@ public class UserDaoHibernateImpl implements UserDao {
     public List<User> getAllUsers() {
         List<User> users = new ArrayList<>();
         try (Session session = Util.getSessionFactory().openSession()) {
-            users = session.createQuery("from User").list();
+            Query<User> query = session.createQuery("from User");
+            users = query.list();
         } catch (HibernateException e) {
             e.printStackTrace();
         }
@@ -92,8 +91,7 @@ public class UserDaoHibernateImpl implements UserDao {
     public void cleanUsersTable() { // очищаем таблу, но саму не удаляем
         try (Session session = Util.getSessionFactory().openSession()) {
             transaction = session.beginTransaction();
-            Query query = session.createQuery("DELETE FROM User");
-            int queryCheck = query.executeUpdate();
+            session.createQuery("DELETE FROM User").executeUpdate();
             transaction.commit();
         } catch (HibernateException e) {
             transaction.rollback();
